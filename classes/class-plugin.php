@@ -73,10 +73,8 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
     }
 
     static function init() {
-
       $plugin = self::this();
       add_rewrite_endpoint( $plugin->map_endpoint, $plugin->epmasks );
-
     }
 
     /**
