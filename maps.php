@@ -10,9 +10,7 @@ include( HARDCORE_MAPS_DIR . '/classes/class-plugin.php' );
 /**
  * Activate the plugin in this runtime by creating an instance of Hardcore_Maps_Plugin class
  */
-new Hardcore_Maps_Plugin(array(
-  'map_endpoint' => 'map',
-));
+new Hardcore_Maps_Plugin();
 
 add_action( 'plugins_loaded',         array( 'Hardcore_Maps_Plugin', 'plugins_loaded' ) );
 add_action( 'init',                   array( 'Hardcore_Maps_Plugin', 'init' ) );
@@ -32,7 +30,7 @@ register_uninstall_hook(    __FILE__, array( 'Hardcore_Maps_Plugin', 'uninstall'
 /**
  * Functions for use in plugins.
  */
-include( HARDCORE_MAPS_DIR . '/functions.php' );
+include HARDCORE_MAPS_DIR . '/functions.php';
 
 /**
  * Template Tags for use in themes.

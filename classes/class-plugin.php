@@ -14,7 +14,26 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
      *
      * @var string
      */
-    var $map_endpoint = 'map';
+    var $map_endpoint = null;
+
+    /**
+     * Meta key that's used to get latitude of a post
+     *
+     * @var string
+     */
+    var $latitude_meta_key  = null;
+
+    /**
+     * Meta key that's used to get longitude of a post
+     *
+     * @var null
+     */
+    var $longitude_meta_key = null;
+
+    /**
+     * @var null
+     */
+    var $epmasks = null;
 
     function __construct( $args = array() ) {
 
@@ -34,7 +53,7 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
      *
      * @return Hardcore_Maps_Plugin|null
      */
-    function this() {
+    static function this() {
       return self::$_this;
     }
 
@@ -55,7 +74,7 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
     static function init() {
 
       $plugin = self::this();
-      add_rewrite_endpoint( $plugin->map_endpoint, EP_ROOT | EP_CATEGORIES | EP_TAGS | EP_SEARCH );
+      add_rewrite_endpoint( $plugin->map_endpoint, $plugin->epmasks );
 
     }
 
@@ -112,7 +131,7 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
 
         if ( file_exists( STYLESHEETPATH .  '/' . $template ) ) {
           // template found in child theme, do nothing
-        } elseif ( file_exists( TEMPLATEPATH   .  '/' , $template ) ) {
+        } elseif ( file_exists( TEMPLATEPATH   .  '/' . $template ) ) {
           // template found in parent theme, do nothing
         } else {
           load_template( HARDCORE_MAPS_DIR . '/templates/' . $template, false );
@@ -126,7 +145,41 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
      * Callback to after_setup_theme action
      */
     static function after_setup_theme() {
-      include HARDCORE_MAPS_DIR . '/functions.php';
+
+      include HARDCORE_MAPS_DIR . '/template-tags.php';
+
+      $plugin = self::this();
+
+      if ( is_null( $plugin->map_endpoint ) ) {
+        $plugin->map_endpoint = 'map';         // slug that is added to end of urls to show maps
+      }
+
+      if ( is_null( $plugin->epmasks ) ) {
+        $plugin->epmasks = EP_ROOT | EP_CATEGORIES | EP_TAGS | EP_SEARCH; // where end points should be added
+      }
+
+      if ( is_null( $plugin->latitude_meta_key ) ) {
+        if ( defined( 'HARDCORE_GEO_QUERY_LATITUDE_META_KEY' ) ) {
+          /**
+           * Use Geo Query constants if Geo Query Plugin is available
+           */
+          $plugin->latitude_meta_key = HARDCORE_GEO_QUERY_LATITUDE_META_KEY;
+        } else {
+          $plugin->latitude_meta_key = 'latitude';    // meta key that's used to get post's latitude
+        }
+      }
+
+      if ( is_null( $plugin->longitude_meta_key ) ) {
+        if ( defined( 'HARDCORE_GEO_QUERY_LONGITUDE_META_KEY' ) ) {
+          /**
+           * Use Geo Query constants if Geo Query Plugin is available
+           */
+          $plugin->longitude_meta_key = HARDCORE_GEO_QUERY_LONGITUDE_META_KEY;
+        } else {
+          $plugin->longitude_meta_key = 'longitude';   // meta key that's used to get post's longitude
+        }
+      }
+
     }
 
     /**
