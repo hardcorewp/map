@@ -10,13 +10,6 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
     private static $_this = null;
 
     /**
-     * Endpoint that will be used to access map for home page, category or tags
-     *
-     * @var string
-     */
-    var $map_endpoint = null;
-
-    /**
      * Meta key that's used to get latitude of a post
      *
      * @var string
@@ -30,11 +23,6 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
      */
     var $longitude_meta_key = null;
 
-    /**
-     * @var null
-     */
-    var $epmasks = null;
-
     function __construct( $args = array() ) {
 
       if ( isset( self::$_this ) ) {
@@ -44,10 +32,12 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
         self::$_this = $this;
       }
 
-      add_action( 'plugins_loaded',         array( $this, 'plugins_loaded' ) );
-      add_action( 'get_template_part_map',  array( $this, 'get_template_part' ), 10, 2 );
+      $defaults = array(
+        'latitude_meta_key'   => ( defined( 'HARDCORE_GEO_QUERY_LATITUDE_META_KEY' ) ? HARDCORE_GEO_QUERY_LATITUDE_META_KEY : 'latitude' ),
+        'longitude_meta_key'  => ( defined( 'HARDCORE_GEO_QUERY_LONGITUDE_META_KEY' ) ? HARDCORE_GEO_QUERY_LONGITUDE_META_KEY : 'longitude' ),
+      );
 
-      self::configure( $args );
+      self::configure( wp_parse_args( $args, $defaults ) );
       self::register_scripts();
 
     }
@@ -76,98 +66,25 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
     }
 
     /**
-     * Callback for get_template_part_map action
-     *
-     * @todo: Remove this for 3.6 and implement template stack
-     *
-     * @param $slug
-     * @param $name
-     */
-    function get_template_part( $slug, $name = '' ) {
-
-      if ( 'map' == $slug ) {
-        /**
-         * WordPress is not able to find templates that are included with plugins,
-         * therefore we'll need to give it some help. The following code checks if map-marker.php files doesn't exist
-         * in the child or parent theme and includes the template from the plugin's template directory.
-         * if it does find a map-marker.php file in the parent or child theme directory then it does nothing and allows
-         * WordPress to take care of the include.
-         */
-        if ( empty( $name ) ) {
-          $template = "{$slug}.php";
-        } else {
-          $template = "{$slug}-{$name}.php";
-        }
-
-        if ( file_exists( STYLESHEETPATH .  '/' . $template ) ) {
-          // template found in child theme, do nothing
-        } elseif ( file_exists( TEMPLATEPATH   .  '/' . $template ) ) {
-          // template found in parent theme, do nothing
-        } else {
-          load_template( HARDCORE_MAPS_DIR . '/templates/' . $template, false );
-        }
-
-        self::enqueue_scripts();
-      }
-
-    }
-
-    /**
      * Callback to after_setup_theme action
      */
     static function after_setup_theme() {
-
       include HARDCORE_MAPS_DIR . '/template-tags.php';
-
-      $plugin = self::this();
-
-      if ( is_null( $plugin->map_endpoint ) ) {
-        $plugin->map_endpoint = 'map';         // slug that is added to end of urls to show maps
-      }
-
-      if ( is_null( $plugin->epmasks ) ) {
-        $plugin->epmasks = EP_ROOT | EP_CATEGORIES | EP_TAGS | EP_SEARCH; // where end points should be added
-      }
-
-      if ( is_null( $plugin->latitude_meta_key ) ) {
-        if ( defined( 'HARDCORE_GEO_QUERY_LATITUDE_META_KEY' ) ) {
-          /**
-           * Use Geo Query constants if Geo Query Plugin is available
-           */
-          $plugin->latitude_meta_key = HARDCORE_GEO_QUERY_LATITUDE_META_KEY;
-        } else {
-          $plugin->latitude_meta_key = 'latitude';    // meta key that's used to get post's latitude
-        }
-      }
-
-      if ( is_null( $plugin->longitude_meta_key ) ) {
-        if ( defined( 'HARDCORE_GEO_QUERY_LONGITUDE_META_KEY' ) ) {
-          /**
-           * Use Geo Query constants if Geo Query Plugin is available
-           */
-          $plugin->longitude_meta_key = HARDCORE_GEO_QUERY_LONGITUDE_META_KEY;
-        } else {
-          $plugin->longitude_meta_key = 'longitude';   // meta key that's used to get post's longitude
-        }
-      }
-
     }
 
     /**
      * Callback for WordPress' plugins_loaded action
      */
-    function plugins_loaded() {
+    static function plugins_loaded() {
+      include HARDCORE_MAPS_DIR . '/functions.php';
 
       if ( class_exists( 'ScaleUp' ) ) {
-
         include( HARDCORE_MAPS_DIR . '/classes/class-addon.php' );
         include( HARDCORE_MAPS_DIR . '/classes/class-map.php' );
         include( HARDCORE_MAPS_DIR . '/classes/class-map-view.php' );
         include( HARDCORE_MAPS_DIR . '/classes/class-map-marker.php' );
         include( HARDCORE_MAPS_DIR . '/classes/class-map-marker-view.php' );
-
       }
-
     }
 
     /**
