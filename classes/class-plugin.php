@@ -45,6 +45,7 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
       }
 
       self::configure( $args );
+      self::register();
 
     }
 
@@ -199,11 +200,7 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
 
     }
 
-    /**
-     * Enqueue scripts for this plugin.
-     * Can be used as callback for wp_enqueue_scripts action
-     */
-    static function wp_enqueue_scripts() {
+    static function register() {
 
       if ( defined( 'SCRIPT_DEBUG' ) && true === SCRIPT_DEBUG ) {
         $min = '.min';
@@ -211,11 +208,25 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
         $min = '';
       }
 
-      wp_register_script( 'jquery-ui-map', plugin_dir_url( dirname( __FILE__ ) ) . "assets/jquery.ui.map{$min}.js", array( 'jquery' ), '3.0-rc', true );
+      wp_register_script( 'google-maps', 'http://maps.google.com/maps/api/js?sensor=true', array(), '3.0', true );
+      wp_register_script( 'jquery-ui-map', plugin_dir_url( dirname( __FILE__ ) ) . "assets/jquery.ui.map{$min}.js", array( 'jquery', 'google-maps' ), '3.0-rc', true );
       wp_register_script( 'jquery-ui-map-extensions', plugin_dir_url( dirname( __FILE__ ) ) . "assets/jquery.ui.map.extensions.js", array( 'jquery', 'jquery-ui-map' ), '3.0-rc', true );
+      wp_register_script( 'mustache', plugin_dir_url( dirname( __FILE__ ) ) . "assets/mustache.js", array(), '0.7.2', true );
+      wp_register_script( 'hardcore-maps', plugin_dir_url( dirname( __FILE__ ) ) . "assets/hardcore.maps.js", array( 'jquery-ui-map', 'jquery-ui-map-extensions', 'mustache' ), HARDCORE_MAPS_VERSION, true );
 
+      wp_register_style( 'hardcore-maps', plugin_dir_url( dirname( __FILE__ ) ) . "assets/hardcore.maps.css", array(), HARDCORE_MAPS_VERSION );
+
+    }
+
+    /**
+     * Enqueue scripts for this plugin.
+     * Can be used as callback for wp_enqueue_scripts action
+     */
+    static function wp_enqueue_scripts() {
       wp_enqueue_script( 'jquery-ui-map' );
       wp_enqueue_script( 'jquery-ui-map-extensions' );
+      wp_enqueue_script( 'hardcore-maps' );
+      wp_enqueue_style( 'hardcore-maps' );
     }
 
     static function activation() {

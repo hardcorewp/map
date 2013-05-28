@@ -4,6 +4,7 @@
  */
 
 define( 'HARDCORE_MAPS_DIR', dirname( __FILE__ ) );
+define( 'HARDCORE_MAPS_VERSION', '1.0' );
 
 include( HARDCORE_MAPS_DIR . '/classes/class-plugin.php' );
 

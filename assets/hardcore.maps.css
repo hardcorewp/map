@@ -1,0 +1,6 @@
+.hardcore.map .canvas {
+  height: 400px;
+}
+.hardcore.map .markers {
+  display: none;
+}
