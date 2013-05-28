@@ -44,8 +44,11 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
         self::$_this = $this;
       }
 
+      add_action( 'plugins_loaded',         array( $this, 'plugins_loaded' ) );
+      add_action( 'get_template_part_map',  array( $this, 'get_template_part' ), 10, 2 );
+
       self::configure( $args );
-      self::register();
+      self::register_scripts();
 
     }
 
@@ -72,42 +75,6 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
       }
     }
 
-    static function init() {
-      $plugin = self::this();
-      add_rewrite_endpoint( $plugin->map_endpoint, $plugin->epmasks );
-    }
-
-    /**
-     * callback for template_include filter that returns map filter if map is being requested
-     *
-     * @param $template
-     * @return mixed
-     */
-    static function template_include( $template ) {
-
-      $plugin = self::this();
-
-      $wp_query = $GLOBALS[ 'wp_query' ];
-
-      if ( isset( $wp_query->query[ $plugin->map_endpoint ] ) ) {
-        $paths = array(
-          get_stylesheet_directory() . '/map.php',  // child theme
-          get_template_directory() . '/map.php',    // parent theme
-          HARDCORE_MAPS_DIR . '/templates/map.php'  // plugin's templates directory
-        );
-
-        foreach ( $paths as $path ) {
-          if ( file_exists( $path ) ) {
-            $template = $path;
-            self::wp_enqueue_scripts();
-            break;
-          }
-        }
-      }
-
-      return $template;
-    }
-
     /**
      * Callback for get_template_part_map action
      *
@@ -116,9 +83,9 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
      * @param $slug
      * @param $name
      */
-    function get_template_part( $slug, $name ) {
+    function get_template_part( $slug, $name = '' ) {
 
-      if ( 'map' == $slug && 'marker' == $name ) {
+      if ( 'map' == $slug ) {
         /**
          * WordPress is not able to find templates that are included with plugins,
          * therefore we'll need to give it some help. The following code checks if map-marker.php files doesn't exist
@@ -126,7 +93,11 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
          * if it does find a map-marker.php file in the parent or child theme directory then it does nothing and allows
          * WordPress to take care of the include.
          */
-        $template = "{$slug}-{$name}.php";
+        if ( empty( $name ) ) {
+          $template = "{$slug}.php";
+        } else {
+          $template = "{$slug}-{$name}.php";
+        }
 
         if ( file_exists( STYLESHEETPATH .  '/' . $template ) ) {
           // template found in child theme, do nothing
@@ -136,6 +107,7 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
           load_template( HARDCORE_MAPS_DIR . '/templates/' . $template, false );
         }
 
+        self::enqueue_scripts();
       }
 
     }
@@ -184,7 +156,7 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
     /**
      * Callback for WordPress' plugins_loaded action
      */
-    static function plugins_loaded() {
+    function plugins_loaded() {
 
       if ( class_exists( 'ScaleUp' ) ) {
 
@@ -198,7 +170,10 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
 
     }
 
-    static function register() {
+    /**
+     * Register all of the scripts that are necessary to display maps
+     */
+    static function register_scripts() {
 
       if ( defined( 'SCRIPT_DEBUG' ) && true === SCRIPT_DEBUG ) {
         $min = '.min';
@@ -220,48 +195,11 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
      * Enqueue scripts for this plugin.
      * Can be used as callback for wp_enqueue_scripts action
      */
-    static function wp_enqueue_scripts() {
+    static function enqueue_scripts() {
       wp_enqueue_script( 'jquery-ui-map' );
       wp_enqueue_script( 'jquery-ui-map-extensions' );
       wp_enqueue_script( 'hardcore-maps' );
       wp_enqueue_style( 'hardcore-maps' );
-    }
-
-    static function activation() {
-
-      if ( ! current_user_can( 'activate_plugins' ) ) {
-        return;
-      }
-      $file = isset( $_REQUEST['plugin'] ) ? $_REQUEST['plugin'] : '';
-      check_admin_referer( "activate-plugin_{$file}" );
-
-      // flush rewrite rules
-      flush_rewrite_rules( false );
-
-    }
-
-    static function deactivation() {
-
-      if ( ! current_user_can( 'activate_plugins' ) ) {
-        return;
-      }
-      $file = isset( $_REQUEST['plugin'] ) ? $_REQUEST['plugin'] : '';
-      check_admin_referer( "deactivate-plugin_{$file}" );
-
-      // flush rewrite rules
-      flush_rewrite_rules( false );
-    }
-
-    static function uninstall() {
-
-      if ( ! current_user_can( 'activate_plugins' ) ) {
-        return;
-      }
-      check_admin_referer( 'bulk-plugins' );
-
-      if ( __FILE__ != WP_UNINSTALL_PLUGIN )
-        return;
-
     }
 
   }

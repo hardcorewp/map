@@ -13,15 +13,6 @@ include( HARDCORE_MAPS_DIR . '/classes/class-plugin.php' );
  */
 new Hardcore_Maps_Plugin();
 
-add_action( 'plugins_loaded',         array( 'Hardcore_Maps_Plugin', 'plugins_loaded' ) );
-add_action( 'init',                   array( 'Hardcore_Maps_Plugin', 'init' ) );
-add_action( 'template_include',       array( 'Hardcore_Maps_Plugin', 'template_include' ) );
-add_action( 'get_template_part_map',  array( 'Hardcore_Maps_Plugin', 'get_template_part' ), 10, 2 );
-
-register_activation_hook(   __FILE__, array( 'Hardcore_Maps_Plugin', 'activation' ) );
-register_deactivation_hook( __FILE__, array( 'Hardcore_Maps_Plugin', 'deactivation' ) );
-register_uninstall_hook(    __FILE__, array( 'Hardcore_Maps_Plugin', 'uninstall' ) );
-
 /**
  * All functions in functions.php and template-tags.php are intended for the use by site builders, themers and plugin
  * developers. These functions can be considered reliable and their functionality will not change between major plugin
