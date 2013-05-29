@@ -76,9 +76,10 @@ if ( !function_exists( 'the_map_options' ) ) {
          * @link: http://standardtheme.com/
          */
         $theme = array(
+          'container'    => '#main',
           'marker'       => '.post',
           'name'         => '.post-title',
-          'url'          => '.post-title a',
+          'link'         => '.post-title a',
           'description'  => '.entry-content',
           'image'        => 'img',
           'latitude'     => '[itemprop=latitude]',

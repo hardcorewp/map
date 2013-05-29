@@ -32,14 +32,16 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
         self::$_this = $this;
       }
 
-      $defaults = array(
+      $default = array(
         'latitude_meta_key'   => ( defined( 'HARDCORE_GEO_QUERY_LATITUDE_META_KEY' ) ? HARDCORE_GEO_QUERY_LATITUDE_META_KEY : 'latitude' ),
         'longitude_meta_key'  => ( defined( 'HARDCORE_GEO_QUERY_LONGITUDE_META_KEY' ) ? HARDCORE_GEO_QUERY_LONGITUDE_META_KEY : 'longitude' ),
       );
 
-      self::configure( wp_parse_args( $args, $defaults ) );
+      self::configure( wp_parse_args( $args, $default ) );
       self::register_scripts();
 
+      add_filter( 'the_content', array( $this, 'the_content' ) );
+      add_filter( 'the_excerpt', array( $this, 'the_excerpt' ) );
     }
 
     /**
@@ -117,6 +119,32 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
       wp_enqueue_script( 'jquery-ui-map-extensions' );
       wp_enqueue_script( 'hardcore-maps' );
       wp_enqueue_style( 'hardcore-maps' );
+    }
+
+    /**
+     * Add GeoCoordinates schema to content
+     *
+     * @param $content
+     * @return string
+     */
+    function the_content( $content ) {
+      $content .= the_geo_coordinates_schema( get_the_ID(), array(
+        'echo' => false
+      ));
+      return $content;
+    }
+
+    /**
+     * Add GeoCoordinates schema to the excerpt
+     *
+     * @param $excerpt
+     * @return string
+     */
+    function the_excerpt( $excerpt ) {
+      $excerpt .= the_geo_coordinates_schema( get_the_ID(), array(
+        'echo' => false
+      ));
+      return $excerpt;
     }
 
   }
