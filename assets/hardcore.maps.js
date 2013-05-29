@@ -1,24 +1,6 @@
 ( function($) {
 
-  $.fn.Hardcore_Maps = function( options ) {
-
-    var options = $.extend( {}, {
-      canvas:         '.canvas',
-      marker:         '.marker',
-      latitude:       '[itemprop=latitude]',
-      longitude:      '[itemprop=longitude]',
-      description:    '[itemprop=description]',
-      name:           '[itemprop=name]',
-      link:           '[itemprop=url]',
-      image:          '[itemprop=image]',
-      content_template:
-        '<div class="marker">' +
-        '<h4><a href="{{url}}">{{name}}</a></h4>' +
-        '<img src="{{image}}" />' +
-        '<p>{{description}}</p>' +
-        '<hr>' +
-        '</div>'
-    }, options );
+  $.fn.Hardcore_Maps = function() {
 
     function marker_content( marker ) {
       return Mustache.render( options.content_template, {
@@ -30,7 +12,21 @@
     }
 
     $( this ).each( function(){
+
       var $map = $( this );
+
+      var options = $.extend( {}, {
+        canvas:         '.canvas',
+        marker:         '.marker',
+        latitude:       '[itemprop=latitude]',
+        longitude:      '[itemprop=longitude]',
+        description:    '[itemprop=description]',
+        name:           '[itemprop=name]',
+        link:           '[itemprop=url]',
+        image:          '[itemprop=image]',
+        template:       'script'
+      }, $.parseJSON( $map.attr( 'data-options' ) ) );
+
       var $canvas = $map.find( options.canvas );
       $canvas.gmap().bind( 'init', function(){
         $map.find( options.marker ).each( function(){
@@ -50,6 +46,6 @@
     return this;
   }
 
-  $( '.hardcore.map' ).Hardcore_Maps({});
+  $( '.hardcore.map' ).Hardcore_Maps();
 
 } (jQuery) );
