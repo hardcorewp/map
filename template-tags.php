@@ -56,19 +56,17 @@ if ( !function_exists( 'the_map_options' ) ) {
   function the_map_options( $options = array(), $echo = false ) {
 
     switch ( get_template() ) :
-      case 'twentyten':
-        $theme = array(
-
-        );
-        break;
-      case 'twentyeleven':
-        $theme = array(
-
-        );
-        break;
+      case 'twentytwelve':
       case 'twentythirteen':
         $theme = array(
-
+          'container'    => '#content',
+          'marker'       => '.hentry',
+          'name'         => '.entry-title',
+          'link'         => '.entry-title a',
+          'description'  => '.entry-content p:first-child',
+          'image'        => '.entry-header img',
+          'latitude'     => '[itemprop=latitude]',
+          'longitude'    => '[itemprop=longitude]',
         );
         break;
       case 'standard' :
@@ -80,7 +78,7 @@ if ( !function_exists( 'the_map_options' ) ) {
           'marker'       => '.post',
           'name'         => '.post-title',
           'link'         => '.post-title a',
-          'description'  => '.entry-content',
+          'description'  => '.entry-content p',
           'image'        => 'img',
           'latitude'     => '[itemprop=latitude]',
           'longitude'    => '[itemprop=longitude]',

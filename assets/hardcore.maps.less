@@ -1,5 +1,36 @@
 .hardcore.map {
+
   .canvas {
     height: 400px;
+
+    /* this fixes problem with zoom bar and images in the maps*/
+    label {
+      width: auto;
+      display: inline;
+    }
+
+    img {
+      max-width: none;
+    }
+  }
+
+  .info-window {
+    margin-top: 10px;
+    h4 {
+      display: inline;
+      margin-bottom: 10px;
+    }
+    img {
+      float: right;
+      width: 150px;
+      margin: 0 0 10px 10px;
+    }
+    hr {
+      clear: both;
+      margin: 0;
+    }
+    p {
+      font-size: 95%;
+    }
   }
 }
