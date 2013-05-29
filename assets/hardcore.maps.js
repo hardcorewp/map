@@ -28,9 +28,13 @@
         image:          '[itemprop=image]',
         template:       'script',
         center:         [ -33.87308, 151.207001 ],
+        height:         '400px',
+        width:          '100%'
       }, $.parseJSON( $map.attr( 'data-options' ) ) );
 
       var $canvas = $map.find( options.canvas );
+      $canvas.height( options.height );
+      $canvas.width( options.width );
 
       $canvas.gmap({
         center: new google.maps.LatLng( options.center[0], options.center[1] )

@@ -18,17 +18,20 @@ if ( !function_exists( 'the_map' ) ) {
    */
   function the_map( $options = array(), $args = array() ) {
 
+    /**
+     * Some options are commented out because they're here for educational purposes.
+     */
     $options = wp_parse_args( $options, array(
-      'width'        => '100%',                 // width of the map canvas ( include the units )
-      'height'       => '400px;',               // height of the map canvas ( include the units )
-      'markers'      => '#main .post',          // css selector of markers
-      'name'         => '.entry-title',         // css selector of the title to show in the info window
-      'link'         => '.entry-title a',       // css selector of the link to be used in the info window
-      'description'  => '.entry-content p',     // css selector of the description to show in the info window
-      'image'        => '.entry-header img',    // css selector of the image to show in info window
-      'latitude'     => '[itemprop=latitude]',  // css selector of the latitude to be used for placing the marker
-      'longitude'    => '[itemprop=longitude]', // css selector of the longitude to be used for placing the marker
-      'canvas'       => '.canvas',              // css selector of the map canvas
+      'width'        => '100%',                  // width of the map canvas ( include the units )
+      'height'       => '400px',                 // height of the map canvas ( include the units )
+#      'markers'      => '#main .post',          // css selector of markers
+#      'name'         => '.entry-title',         // css selector of the title to show in the info window
+#      'link'         => '.entry-title a',       // css selector of the link to be used in the info window
+#      'description'  => '.entry-content p',     // css selector of the description to show in the info window
+#      'image'        => '.entry-header img',    // css selector of the image to show in info window
+#      'latitude'     => '[itemprop=latitude]',  // css selector of the latitude to be used for placing the marker
+#      'longitude'    => '[itemprop=longitude]', // css selector of the longitude to be used for placing the marker
+      'canvas'       => '.canvas',               // css selector of the map canvas
       'center'       => array( -33.87308, 151.207001 )  // default center point for the map
     ));
 
@@ -42,7 +45,7 @@ if ( !function_exists( 'the_map' ) ) {
       Hardcore_Maps_Plugin::enqueue_scripts();
     }
 
-    $options  = apply_filters( 'the_map_options',        $options );
+    $options  = apply_filters( 'the_map_options', $options );
     $template = apply_filters( 'the_map_marker_template', $args[ 'marker_template' ] );
 
     $json = json_encode( $options );
@@ -99,7 +102,7 @@ if ( !function_exists( 'the_map_options' ) ) {
           'name'         => '.post-title',
           'link'         => '.post-title a',
           'description'  => '.entry-content p',
-          'image'        => 'img',
+          'image'        => '.thumbnail img',
           'latitude'     => '[itemprop=latitude]',
           'longitude'    => '[itemprop=longitude]',
         );
@@ -191,7 +194,7 @@ if ( !function_exists( 'the_geo_coordinates_schema' ) ) {
 
     if ( $args[ 'latitude' ] && $args[ 'longitude' ] ) {
       $html = <<<HTML
-<span itemprop="geo" itemscope="itemscope" itemtype="http://schema.org/GeoCoordinates">
+<span itemprop="geo" itemscope="itemscope" itemtype="http://schema.org/GeoCoordinates" data-icon="{$icon}">
   <meta itemprop="latitude" content="{$args['latitude']}" />
   <meta itemprop="longitude" content="{$args['longitude']}" />
 </span>
