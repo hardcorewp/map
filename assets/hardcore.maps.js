@@ -19,7 +19,7 @@
       // merge options from data-options attribute with default options
       var options = $.extend( {}, {
         canvas:         '.canvas',
-        marker:         '.marker',
+        markers:        '.marker',
         latitude:       '[itemprop=latitude]',
         longitude:      '[itemprop=longitude]',
         description:    '[itemprop=description]',
@@ -27,15 +27,17 @@
         link:           '[itemprop=url]',
         image:          '[itemprop=image]',
         template:       'script',
-        container:      '#main'
+        center:         [ -33.87308, 151.207001 ],
       }, $.parseJSON( $map.attr( 'data-options' ) ) );
 
       var $canvas = $map.find( options.canvas );
 
-      $canvas.gmap().bind( 'init', function(){
+      $canvas.gmap({
+        center: new google.maps.LatLng( options.center[0], options.center[1] )
+      }).bind( 'init', function(){
 
         // find all markers in the container
-        $( options.container + ' ' + options.marker ).each( function(){
+        $( options.markers ).each( function(){
           var $marker = $( this );
           var lat = $marker.find( options.latitude ).attr( 'content' );
           var lng = $marker.find( options.longitude ).attr( 'content' );

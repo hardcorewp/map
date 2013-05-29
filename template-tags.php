@@ -1,26 +1,48 @@
 <?php
 if ( !function_exists( 'the_map' ) ) {
   /**
+   * Output the map markup that hardcore.maps.js will replace with a Google Map
    *
-   * @param array $args
+   * When the page is rendered by the browser, hardcore-maps.js will look for DOM elements that match selector ".hardcore.maps"
+   *  - for every found instance of the map markup
+   *    - get options from data-options attribute
+   *    - initialize the map in the DOM element that matches the selector in canvas option ( default: ".canvas" )
+   *    - find all markers that match markers option ( default: "#content .hentry" )
+   *        - for every found marker
+   *            -  add a marker to the map
+   *
+   * @param array $options map options
+   * @param array $args output arguments
+   *
    * @return string
    */
-  function the_map( $args = array() ) {
+  function the_map( $options = array(), $args = array() ) {
 
-    $default = array(
-      'echo'     => true,       // echo the output
-      'enqueue'  => true,       // enqueue scripts and styles
-      'options'  => array(),    // options to be passed to javascript
-      'marker_template' => '',  // Mustache template to be used for
-    );
+    $options = wp_parse_args( $options, array(
+      'width'        => '100%',                 // width of the map canvas ( include the units )
+      'height'       => '400px;',               // height of the map canvas ( include the units )
+      'markers'      => '#main .post',          // css selector of markers
+      'name'         => '.entry-title',         // css selector of the title to show in the info window
+      'link'         => '.entry-title a',       // css selector of the link to be used in the info window
+      'description'  => '.entry-content p',     // css selector of the description to show in the info window
+      'image'        => '.entry-header img',    // css selector of the image to show in info window
+      'latitude'     => '[itemprop=latitude]',  // css selector of the latitude to be used for placing the marker
+      'longitude'    => '[itemprop=longitude]', // css selector of the longitude to be used for placing the marker
+      'canvas'       => '.canvas',              // css selector of the map canvas
+      'center'       => array( -33.87308, 151.207001 )  // default center point for the map
+    ));
 
-    $args = wp_parse_args( $args, $default );
+    $args = wp_parse_args( $args, array(
+      'echo'      => true,            // echo the output
+      'enqueue'   => true,            // enqueue scripts and styles
+      'marker_template' => '',        // Mustache template to be used for
+    ));
 
     if ( $args[ 'enqueue' ] ) {
       Hardcore_Maps_Plugin::enqueue_scripts();
     }
 
-    $options  = apply_filters( 'the_map_options', $args[ 'options' ] );
+    $options  = apply_filters( 'the_map_options',        $options );
     $template = apply_filters( 'the_map_marker_template', $args[ 'marker_template' ] );
 
     $json = json_encode( $options );
@@ -59,8 +81,7 @@ if ( !function_exists( 'the_map_options' ) ) {
       case 'twentytwelve':
       case 'twentythirteen':
         $theme = array(
-          'container'    => '#content',
-          'marker'       => '.hentry',
+          'markers'      => '#content .hentry',
           'name'         => '.entry-title',
           'link'         => '.entry-title a',
           'description'  => '.entry-content p:first-child',
@@ -74,8 +95,7 @@ if ( !function_exists( 'the_map_options' ) ) {
          * @link: http://standardtheme.com/
          */
         $theme = array(
-          'container'    => '#main',
-          'marker'       => '.post',
+          'markers'      => '#main .post',
           'name'         => '.post-title',
           'link'         => '.post-title a',
           'description'  => '.entry-content p',
@@ -85,7 +105,15 @@ if ( !function_exists( 'the_map_options' ) ) {
         );
         break;
       default:
-        $theme = array();
+        $theme = array(
+          'markers'     => '#content .hentry',
+          'name'         => '.entry-title',
+          'link'         => '.entry-title a',
+          'description'  => '.entry-content p:first-child',
+          'image'        => '.entry-header img',
+          'latitude'     => '[itemprop=latitude]',
+          'longitude'    => '[itemprop=longitude]',
+        );
     endswitch;
 
     $options = wp_parse_args( $options, $theme );
