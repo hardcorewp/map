@@ -26,6 +26,7 @@
         name:           '[itemprop=name]',
         link:           '[itemprop=url]',
         image:          '[itemprop=image]',
+        geo:            '[itemprop=geo]',
         template:       'script',
         center:         [ -33.87308, 151.207001 ],
         height:         '400px',
@@ -47,8 +48,9 @@
           var lng = $marker.find( options.longitude ).attr( 'content' );
           if ( lat && lng ) {
             $canvas.gmap( 'addMarker', {
-              'position': new google.maps.LatLng( lat, lng ),
-              'bounds'  : true
+              position  : new google.maps.LatLng( lat, lng ),
+              bounds    : true,
+              icon      : $marker.find( options.geo ).attr( 'data-icon-url' )
             } ).click( function(){
                 $canvas.gmap( 'openInfoWindow', {
                   'content': marker_content( $map, $marker, options )
