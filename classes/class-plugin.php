@@ -49,6 +49,15 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
 
       add_filter( 'the_content', array( $this, 'the_content' ) );
       add_filter( 'the_excerpt', array( $this, 'the_excerpt' ) );
+
+      if ( is_admin() ) {
+        /**
+         * ACF Fields
+         */
+        add_filter('acf_load_field-marker_icon',      array( $this, 'acf_load_field_marker_icon' ));
+        add_filter('acf/load_field/name=marker_icon', array( $this, 'acf_load_field_marker_icon' ) );
+      }
+
     }
 
     /**
@@ -160,24 +169,45 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
      * @param $icon
      * @return bool|string
      */
-    static function locate_icon( $icon ) {
+    static function locate_icon_url( $icon ) {
 
-      $icon_file = "/icons/{$icon}.php";
+      $icon_file = "icons/{$icon}.png";
 
-      if ( file_exists( get_stylesheet_directory() . $icon_file ) ) {
+      if ( file_exists( get_stylesheet_directory() . "/$icon_file" ) ) {
         // get icon from child theme
         $url = get_stylesheet_directory_uri() . $icon_file;
-      } elseif ( file_exists( get_template_directory() . $icon_file ) ) {
+      } elseif ( file_exists( get_template_directory() . "/$icon_file" ) ) {
         // get icon from parent theme
         $url = get_template_directory_uri() . $icon_file;
-      } elseif ( file_exists( plugin_dir_path( dirname( HARDCORE_MAPS_DIR ) ) . $icon_file ) ) {
+      } elseif ( file_exists( plugin_dir_path( HARDCORE_MAPS_PATH ) . $icon_file ) ) {
         // get icon from the plugin
-        $url = plugin_dir_url( dirname( HARDCORE_MAPS_DIR ) ) . $icon_file;
+        $url = plugin_dir_url( HARDCORE_MAPS_PATH ) . $icon_file;
       } else {
         $url = false;
       }
 
       return $url;
+    }
+
+    /**
+     * Dynamically populate Marker Icon select field with icons from icons directory.
+     *
+     * @param $field
+     * @return mixed
+     */
+    function acf_load_field_marker_icon( $field ) {
+
+      $field[ 'choices' ] = array(
+        '' => '-- Select an icon --',
+      );
+
+      foreach ( glob( plugin_dir_path( HARDCORE_MAPS_PATH ) . 'icons/*.png' ) as $filename ) {
+        $icon = pathinfo($filename, PATHINFO_FILENAME);
+        $field[ 'choices' ][ $icon ] = $icon;
+      }
+
+      return $field;
+
     }
 
   }

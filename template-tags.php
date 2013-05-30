@@ -197,7 +197,7 @@ if ( !function_exists( 'the_geo_coordinates_schema' ) ) {
       'post_ID' => $post_ID,
     )));
 
-    $icon_url = Hardcore_Maps_Plugin::locate_icon( $icon );
+    $icon_url = Hardcore_Maps_Plugin::locate_icon_url( $icon );
 
     if ( $args[ 'latitude' ] && $args[ 'longitude' ] ) {
       $html = <<<HTML

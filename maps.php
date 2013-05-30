@@ -3,6 +3,7 @@
  * Plugin Name: Maps
  */
 
+define( 'HARDCORE_MAPS_PATH', __FILE__ );
 define( 'HARDCORE_MAPS_DIR', dirname( __FILE__ ) );
 define( 'HARDCORE_MAPS_VERSION', '1.0' );
 
