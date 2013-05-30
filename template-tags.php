@@ -192,9 +192,16 @@ if ( !function_exists( 'the_geo_coordinates_schema' ) ) {
       $args[ 'longitude' ] = get_post_meta( $post_ID, $plugin->longitude_meta_key, true );
     }
 
+    $icon = apply_filters_ref_array( 'the_map_marker_icon', array( null, array(
+      'echo'    => false,
+      'post_ID' => $post_ID,
+    )));
+
+    $icon_url = Hardcore_Maps_Plugin::locate_icon( $icon );
+
     if ( $args[ 'latitude' ] && $args[ 'longitude' ] ) {
       $html = <<<HTML
-<span itemprop="geo" itemscope="itemscope" itemtype="http://schema.org/GeoCoordinates" data-icon="{$icon}">
+<span itemprop="geo" itemscope="itemscope" itemtype="http://schema.org/GeoCoordinates" data-icon-url="{$icon_url}">
   <meta itemprop="latitude" content="{$args['latitude']}" />
   <meta itemprop="longitude" content="{$args['longitude']}" />
 </span>
@@ -211,3 +218,35 @@ HTML;
     return $html;
   }
 }
+
+if ( !function_exists( 'the_map_marker_icon' ) ) {
+  /**
+   * Return the name of the icon
+   *
+   * To programmatically change the marker, define a function in the same name in your plugin or theme and include the
+   * logic that determines what marker should be displayed. The return value should be a string that will be used to
+   * the create the filename of the using {$icon}.png template.
+   *
+   * @param null $icon
+   * @param array $args
+   *
+   * @return string
+   */
+  function the_map_marker_icon( $icon = null, $args = array() ) {
+
+    $default = array(
+      'echo'    => true,
+      'post_ID' => get_the_ID(),
+    );
+
+    $args = wp_parse_args( $args, $default );
+
+    $plugin = Hardcore_Maps_Plugin::this();
+
+    $icon = get_post_meta( $args[ 'post_ID' ], $plugin->marker_icon_meta_key, true );
+
+    return $icon;
+  }
+
+}
+add_filter( 'the_map_marker_icon', 'the_map_marker_icon' );

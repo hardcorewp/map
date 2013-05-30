@@ -10,18 +10,25 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
     private static $_this = null;
 
     /**
-     * Meta key that's used to get latitude of a post
+     * Meta key of the latitude of a post
      *
      * @var string
      */
     var $latitude_meta_key  = null;
 
     /**
-     * Meta key that's used to get longitude of a post
+     * Meta key of the get longitude of a post
      *
      * @var null
      */
     var $longitude_meta_key = null;
+
+    /**
+     * Meta key of the marker icon
+     *
+     * @param array $args
+     */
+    var $marker_icon_meta_key = 'marker_icon';
 
     function __construct( $args = array() ) {
 
@@ -145,6 +152,32 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
         'echo' => false
       ));
       return $excerpt;
+    }
+
+    /**
+     * Return url of an icon with specific name or false if not found
+     *
+     * @param $icon
+     * @return bool|string
+     */
+    static function locate_icon( $icon ) {
+
+      $icon_file = "/icons/{$icon}.php";
+
+      if ( file_exists( get_stylesheet_directory() . $icon_file ) ) {
+        // get icon from child theme
+        $url = get_stylesheet_directory_uri() . $icon_file;
+      } elseif ( file_exists( get_template_directory() . $icon_file ) ) {
+        // get icon from parent theme
+        $url = get_template_directory_uri() . $icon_file;
+      } elseif ( file_exists( plugin_dir_path( dirname( HARDCORE_MAPS_DIR ) ) . $icon_file ) ) {
+        // get icon from the plugin
+        $url = plugin_dir_url( dirname( HARDCORE_MAPS_DIR ) ) . $icon_file;
+      } else {
+        $url = false;
+      }
+
+      return $url;
     }
 
   }
