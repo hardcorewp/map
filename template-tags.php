@@ -22,16 +22,17 @@ if ( !function_exists( 'the_map' ) ) {
      * Some options are commented out because they're here for educational purposes.
      */
     $options = wp_parse_args( $options, array(
-      'width'        => '100%',                  // width of the map canvas ( include the units )
-      'height'       => '400px',                 // height of the map canvas ( include the units )
-#      'markers'      => '#main .post',          // css selector of markers
-#      'name'         => '.entry-title',         // css selector of the title to show in the info window
-#      'link'         => '.entry-title a',       // css selector of the link to be used in the info window
-#      'description'  => '.entry-content p',     // css selector of the description to show in the info window
-#      'image'        => '.entry-header img',    // css selector of the image to show in info window
-#      'latitude'     => '[itemprop=latitude]',  // css selector of the latitude to be used for placing the marker
-#      'longitude'    => '[itemprop=longitude]', // css selector of the longitude to be used for placing the marker
-      'canvas'       => '.canvas',               // css selector of the map canvas
+      'width'        => '100%',                 // width of the map canvas ( include the units )
+      'height'       => '400px',                // height of the map canvas ( include the units )
+#      'markers'     => '#main .post',          // css selector of markers
+#      'name'        => '.entry-title',         // css selector of the title to show in the info window
+#      'link'        => '.entry-title a',       // css selector of the link to be used in the info window
+#      'description' => '.entry-content p',     // css selector of the description to show in the info window
+#      'image'       => '.entry-header img',    // css selector of the image to show in info window
+#      'latitude'    => '[itemprop=latitude]',  // css selector of the latitude to be used for placing the marker
+#      'longitude'   => '[itemprop=longitude]', // css selector of the longitude to be used for placing the marker
+      'position'     => null,                   // set to 'autodetect' to have the position detected with geolocation
+      'canvas'       => '.canvas',              // css selector of the map canvas
       'center'       => array( -33.87308, 151.207001 )  // default center point for the map
     ));
 
