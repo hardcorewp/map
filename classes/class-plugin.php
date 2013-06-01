@@ -47,9 +47,6 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
       self::configure( wp_parse_args( $args, $default ) );
       self::register_scripts();
 
-      add_filter( 'the_content', array( $this, 'the_content' ) );
-      add_filter( 'the_excerpt', array( $this, 'the_excerpt' ) );
-
       if ( is_admin() ) {
         /**
          * ACF Fields
@@ -143,7 +140,7 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
      * @param $content
      * @return string
      */
-    function the_content( $content ) {
+    static function the_content( $content ) {
       $content .= the_geo_coordinates_schema( get_the_ID(), array(
         'echo' => false
       ));
@@ -156,7 +153,7 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
      * @param $excerpt
      * @return string
      */
-    function the_excerpt( $excerpt ) {
+    static function the_excerpt( $excerpt ) {
       $excerpt .= the_geo_coordinates_schema( get_the_ID(), array(
         'echo' => false
       ));

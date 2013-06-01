@@ -14,8 +14,15 @@ include( HARDCORE_MAPS_DIR . '/classes/class-plugin.php' );
  */
 new Hardcore_Maps_Plugin();
 
+// include Functions API after all plugins were loaded
 add_action( 'plugins_loaded',     array( 'Hardcore_Maps_Plugin', 'plugins_loaded' ) );
+
+// include Template Tags API after parent and child themes were loaded
 add_action( 'after_setup_theme',  array( 'Hardcore_Maps_Plugin', 'after_setup_theme' ) );
+
+// Callbacks that add GeoCoordinates schema markup to the end of the content
+add_filter( 'the_content', array( 'Hardcore_Maps_Plugin', 'the_content' ) );
+add_filter( 'the_excerpt', array( 'Hardcore_Maps_Plugin', 'the_excerpt' ) );
 
 /**
  * All functions in functions.php and template-tags.php are intended for the use by site builders, themers and plugin
