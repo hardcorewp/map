@@ -31,7 +31,7 @@ if ( !class_exists( 'Hardcore_Map_Marker_View' ) ) {
 
       if ( !isset( $request->vars ) || ( isset( $request->vars ) && empty( $request->vars[ 'map_name' ] ) ) ) {
         $site = ScaleUp::get_site();
-        /*** @var $map Hardcore_Map **/
+        /*** @var $map Hardcore_Map_Feature **/
         $map = $site->get_feature( 'map', $request->vars[ 'map_name' ] );
         if ( is_object( $map ) ) {
           $request->template_data[ 'markers' ] = $map->get_features( 'markers' );

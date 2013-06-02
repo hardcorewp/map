@@ -55,6 +55,13 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
         add_filter('acf/load_field/name=marker_icon', array( $this, 'acf_load_field_marker_icon' ) );
       }
 
+      // Let's make sure we are actually doing AJAX first
+      if( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+        // Add our callbacks for AJAX requests
+        add_action( 'wp_ajax_hardcore_maps',        array( $this, 'wp_ajax_hardcore_maps' ) ); // For logged in users
+        add_action( 'wp_ajax_nopriv_hardcore_maps', array( $this, 'wp_ajax_nopriv_hardcore_maps' ) ); // For logged out users
+      }
+
     }
 
     /**
@@ -95,9 +102,9 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
 
       if ( class_exists( 'ScaleUp' ) ) {
         include( HARDCORE_MAPS_DIR . '/classes/class-addon.php' );
-        include( HARDCORE_MAPS_DIR . '/classes/class-map.php' );
+        include( HARDCORE_MAPS_DIR . '/classes/class-map-feature.php' );
         include( HARDCORE_MAPS_DIR . '/classes/class-map-view.php' );
-        include( HARDCORE_MAPS_DIR . '/classes/class-map-marker.php' );
+        include( HARDCORE_MAPS_DIR . '/classes/class-map-marker-feature.php' );
         include( HARDCORE_MAPS_DIR . '/classes/class-map-marker-view.php' );
       }
     }
@@ -132,6 +139,13 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
       wp_enqueue_script( 'jquery-ui-map-extensions' );
       wp_enqueue_script( 'hardcore-maps' );
       wp_enqueue_style( 'hardcore-maps' );
+
+      // Pass a collection of variables to our JavaScript
+      wp_localize_script( 'hardcore-maps', 'Hardcore_Maps', array(
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'action' => 'hardcore-maps',
+        'nonce' => wp_create_nonce( 'hardcore-maps' ),
+      ) );
     }
 
     /**
@@ -205,6 +219,33 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
 
       return $field;
 
+    }
+
+    function wp_ajax_hardcore_maps() {
+
+      // By default, let's start with an error message
+      $response = array(
+        'status' => 'error',
+        'message' => 'Invalid nonce',
+      );
+
+      // Next, check to see if the nonce is valid
+      if( isset( $_GET['nonce'] ) && wp_verify_nonce( $_GET['nonce'], 'hardcore-maps' ) ){
+
+
+
+        // Update our message / status since our request was successfully processed
+        $response['status'] = 'success';
+        $response['message'] = "Request processed successfully";
+
+      }
+
+      die;
+
+    }
+
+    function wp_ajax_nopriv_hardcore_maps() {
+      $this->wp_ajax_hardcore_maps();
     }
 
   }

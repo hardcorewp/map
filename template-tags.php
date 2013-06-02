@@ -24,16 +24,17 @@ if ( !function_exists( 'the_map' ) ) {
     $options = wp_parse_args( $options, array(
       'width'        => '100%',                 // width of the map canvas ( include the units )
       'height'       => '400px',                // height of the map canvas ( include the units )
-#      'markers'     => '#main .post',          // css selector of markers
+#      'marker'      => '#main .post',          // css selector of markers
 #      'name'        => '.entry-title',         // css selector of the title to show in the info window
 #      'link'        => '.entry-title a',       // css selector of the link to be used in the info window
 #      'description' => '.entry-content p',     // css selector of the description to show in the info window
 #      'image'       => '.entry-header img',    // css selector of the image to show in info window
 #      'latitude'    => '[itemprop=latitude]',  // css selector of the latitude to be used for placing the marker
 #      'longitude'   => '[itemprop=longitude]', // css selector of the longitude to be used for placing the marker
+      'center'       => array( -33.87308, 151.207001 ),  // initial center point for the map
       'position'     => null,                   // set to 'autodetect' to have the position detected with geolocation
       'canvas'       => '.canvas',              // css selector of the map canvas
-      'center'       => array( -33.87308, 151.207001 )  // default center point for the map
+      'source'       => 'markup',               // 'markup' or 'ajax'
     ));
 
     $args = wp_parse_args( $args, array(
@@ -41,10 +42,6 @@ if ( !function_exists( 'the_map' ) ) {
       'enqueue'   => true,            // enqueue scripts and styles
       'marker_template' => '',        // Mustache template to be used for
     ));
-
-    if ( $args[ 'enqueue' ] ) {
-      Hardcore_Maps_Plugin::enqueue_scripts();
-    }
 
     $options  = apply_filters( 'the_map_options', $options );
     $template = apply_filters( 'the_map_marker_template', $args[ 'marker_template' ] );
@@ -59,6 +56,10 @@ if ( !function_exists( 'the_map' ) ) {
       </script>
   </div>
 HTML;
+
+    if ( $args[ 'enqueue' ] ) {
+      Hardcore_Maps_Plugin::enqueue_scripts();
+    }
 
     if ( $args[ 'echo' ] ) {
       echo $html;
@@ -85,7 +86,7 @@ if ( !function_exists( 'the_map_options' ) ) {
       case 'twentytwelve':
       case 'twentythirteen':
         $theme = array(
-          'markers'      => '#content .hentry',
+          'marker'       => '#content .hentry',
           'name'         => '.entry-title',
           'link'         => '.entry-title a',
           'description'  => '.entry-content p:first-child',
@@ -99,7 +100,7 @@ if ( !function_exists( 'the_map_options' ) ) {
          * @link: http://standardtheme.com/
          */
         $theme = array(
-          'markers'      => '#main .post',
+          'marker'       => '#main .post',
           'name'         => '.post-title',
           'link'         => '.post-title a',
           'description'  => '.entry-content p',
@@ -110,7 +111,7 @@ if ( !function_exists( 'the_map_options' ) ) {
         break;
       default:
         $theme = array(
-          'markers'     => '#content .hentry',
+          'marker'       => '#content .hentry',
           'name'         => '.entry-title',
           'link'         => '.entry-title a',
           'description'  => '.entry-content p:first-child',
@@ -242,9 +243,11 @@ if ( !function_exists( 'the_map_marker_icon' ) ) {
 
     $args = wp_parse_args( $args, $default );
 
-    $plugin = Hardcore_Maps_Plugin::this();
+    $icon = Hardcore_Maps::get_map_marker_icon( $args );
 
-    $icon = get_post_meta( $args[ 'post_ID' ], $plugin->marker_icon_meta_key, true );
+    if ( $args[ 'echo' ] ) {
+      echo $icon;
+    }
 
     return $icon;
   }
