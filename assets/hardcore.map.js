@@ -1,0 +1,1 @@
+/Users/taras/Repositories/bootstrap-map/bootstrap-map.js

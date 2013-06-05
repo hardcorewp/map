@@ -1,11 +1,11 @@
 <?php
-if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
+if ( !class_exists( 'Hardcore_Map_Plugin' ) ) {
 
-  class Hardcore_Maps_Plugin {
+  class Hardcore_Map_Plugin {
 
     /**
      *
-     * @var Hardcore_Maps_Plugin|null
+     * @var Hardcore_Map_Plugin|null
      */
     private static $_this = null;
 
@@ -58,8 +58,8 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
       // Let's make sure we are actually doing AJAX first
       if( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
         // Add our callbacks for AJAX requests
-        add_action( 'wp_ajax_hardcore_maps',        array( $this, 'wp_ajax_hardcore_maps' ) ); // For logged in users
-        add_action( 'wp_ajax_nopriv_hardcore_maps', array( $this, 'wp_ajax_nopriv_hardcore_maps' ) ); // For logged out users
+        add_action( 'wp_ajax_hardcore_map',        array( $this, 'wp_ajax_hardcore_map' ) ); // For logged in users
+        add_action( 'wp_ajax_nopriv_hardcore_map', array( $this, 'wp_ajax_nopriv_hardcore_map' ) ); // For logged out users
       }
 
     }
@@ -67,7 +67,7 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
     /**
      * Return existing instance of this plugin
      *
-     * @return Hardcore_Maps_Plugin|null
+     * @return Hardcore_Map_Plugin|null
      */
     static function this() {
       return self::$_this;
@@ -91,22 +91,14 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
      * Callback to after_setup_theme action
      */
     static function after_setup_theme() {
-      include HARDCORE_MAPS_DIR . '/template-tags.php';
+      include HARDCORE_MAP_DIR . '/template-tags.php';
     }
 
     /**
      * Callback for WordPress' plugins_loaded action
      */
     static function plugins_loaded() {
-      include HARDCORE_MAPS_DIR . '/functions.php';
-
-      if ( class_exists( 'ScaleUp' ) ) {
-        include( HARDCORE_MAPS_DIR . '/classes/class-addon.php' );
-        include( HARDCORE_MAPS_DIR . '/classes/class-map-feature.php' );
-        include( HARDCORE_MAPS_DIR . '/classes/class-map-view.php' );
-        include( HARDCORE_MAPS_DIR . '/classes/class-map-marker-feature.php' );
-        include( HARDCORE_MAPS_DIR . '/classes/class-map-marker-view.php' );
-      }
+      include HARDCORE_MAP_DIR . '/functions.php';
     }
 
     /**
@@ -122,11 +114,9 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
 
       wp_register_script( 'google-maps', 'http://maps.google.com/maps/api/js?sensor=true', array(), '3.0', true );
       wp_register_script( 'jquery-ui-map', plugin_dir_url( dirname( __FILE__ ) ) . "assets/jquery.ui.map{$min}.js", array( 'jquery', 'google-maps' ), '3.0-rc', true );
-      wp_register_script( 'jquery-ui-map-extensions', plugin_dir_url( dirname( __FILE__ ) ) . "assets/jquery.ui.map.extensions.js", array( 'jquery', 'jquery-ui-map' ), '3.0-rc', true );
-      wp_register_script( 'mustache', plugin_dir_url( dirname( __FILE__ ) ) . "assets/mustache.js", array(), '0.7.2', true );
-      wp_register_script( 'hardcore-maps', plugin_dir_url( dirname( __FILE__ ) ) . "assets/hardcore.maps.js", array( 'jquery-ui-map', 'jquery-ui-map-extensions', 'mustache' ), HARDCORE_MAPS_VERSION, true );
+      wp_register_script( 'hardcore-map', plugin_dir_url( dirname( __FILE__ ) ) . "assets/hardcore.map.js", array( 'jquery-ui-map' ), HARDCORE_MAP_VERSION, true );
 
-      wp_register_style( 'hardcore-maps', plugin_dir_url( dirname( __FILE__ ) ) . "assets/hardcore.maps.css", array(), HARDCORE_MAPS_VERSION );
+      wp_register_style( 'hardcore-map', plugin_dir_url( dirname( __FILE__ ) ) . "assets/hardcore.map.css", array(), HARDCORE_MAP_VERSION );
 
     }
 
@@ -137,14 +127,14 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
     static function enqueue_scripts() {
       wp_enqueue_script( 'jquery-ui-map' );
       wp_enqueue_script( 'jquery-ui-map-extensions' );
-      wp_enqueue_script( 'hardcore-maps' );
-      wp_enqueue_style( 'hardcore-maps' );
+      wp_enqueue_script( 'hardcore-map' );
+      wp_enqueue_style( 'hardcore-map' );
 
       // Pass a collection of variables to our JavaScript
-      wp_localize_script( 'hardcore-maps', 'Hardcore_Maps', array(
+      wp_localize_script( 'hardcore-map', 'Hardcore_Map', array(
         'ajax_url' => admin_url('admin-ajax.php'),
-        'action' => 'hardcore-maps',
-        'nonce' => wp_create_nonce( 'hardcore-maps' ),
+        'action' => 'hardcore-map',
+        'nonce' => wp_create_nonce( 'hardcore-map' ),
       ) );
     }
 
@@ -190,9 +180,9 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
       } elseif ( file_exists( get_template_directory() . "/$icon_file" ) ) {
         // get icon from parent theme
         $url = get_template_directory_uri() . $icon_file;
-      } elseif ( file_exists( plugin_dir_path( HARDCORE_MAPS_PATH ) . $icon_file ) ) {
+      } elseif ( file_exists( plugin_dir_path( HARDCORE_MAP_PATH ) . $icon_file ) ) {
         // get icon from the plugin
-        $url = plugin_dir_url( HARDCORE_MAPS_PATH ) . $icon_file;
+        $url = plugin_dir_url( HARDCORE_MAP_PATH ) . $icon_file;
       } else {
         $url = false;
       }
@@ -212,7 +202,7 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
         '' => '-- Select an icon --',
       );
 
-      foreach ( glob( plugin_dir_path( HARDCORE_MAPS_PATH ) . 'icons/*.png' ) as $filename ) {
+      foreach ( glob( plugin_dir_path( HARDCORE_MAP_PATH ) . 'icons/*.png' ) as $filename ) {
         $icon = pathinfo($filename, PATHINFO_FILENAME);
         $field[ 'choices' ][ $icon ] = $icon;
       }
@@ -221,7 +211,7 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
 
     }
 
-    function wp_ajax_hardcore_maps() {
+    function wp_ajax_hardcore_map() {
 
       // By default, let's start with an error message
       $response = array(
@@ -230,9 +220,7 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
       );
 
       // Next, check to see if the nonce is valid
-      if( isset( $_GET['nonce'] ) && wp_verify_nonce( $_GET['nonce'], 'hardcore-maps' ) ){
-
-
+      if( isset( $_GET['nonce'] ) && wp_verify_nonce( $_GET['nonce'], 'hardcore-map' ) ){
 
         // Update our message / status since our request was successfully processed
         $response['status'] = 'success';
@@ -244,8 +232,8 @@ if ( !class_exists( 'Hardcore_Maps_Plugin' ) ) {
 
     }
 
-    function wp_ajax_nopriv_hardcore_maps() {
-      $this->wp_ajax_hardcore_maps();
+    function wp_ajax_nopriv_hardcore_map() {
+      $this->wp_ajax_hardcore_map();
     }
 
   }

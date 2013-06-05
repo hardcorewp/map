@@ -1,64 +1,52 @@
 <?php
 if ( !function_exists( 'the_map' ) ) {
   /**
-   * Output the map markup that hardcore.maps.js will replace with a Google Map
+   * Output the map markup that will be replaced with a Google Map
    *
-   * When the page is rendered by the browser, hardcore-maps.js will look for DOM elements that match selector ".hardcore.maps"
-   *  - for every found instance of the map markup
-   *    - get options from data-options attribute
-   *    - initialize the map in the DOM element that matches the selector in canvas option ( default: ".canvas" )
-   *    - find all markers that match markers option ( default: "#content .hentry" )
-   *        - for every found marker
-   *            -  add a marker to the map
-   *
-   * @param array $options map options
+   * @param array $attributes Bootstrap Map data attributes
    * @param array $args output arguments
    *
    * @return string
    */
-  function the_map( $options = array(), $args = array() ) {
+  function the_map( $attributes = array(), $args = array() ) {
 
     /**
-     * Some options are commented out because they're here for educational purposes.
+     * Attribute options that are used to configure the Bootstrap Map plugin
+     *
+     * 'marker'      => '#main .post',          // css selector of markers
+     * 'latitude'    => '[itemprop=latitude]',  // css selector of the latitude to be used for placing the marker
+     * 'longitude'   => '[itemprop=longitude]', // css selector of the longitude to be used for placing the marker
+     * 'name'        => '.entry-title',         // css selector of the title to show in the info window
+     * 'link'        => '.entry-title a',       // css selector of the link to be used in the info window
+     * 'description' => '.entry-content p',     // css selector of the description to show in the info window
+     * 'image'       => '.entry-header img',    // css selector of the image to show in info window
+     * 'center'      => '-33.87308,151.207001', // initial center point for the map ( LatLng string or 'geolocation' )
+     * 'template'    => '<div><div class="info-window"><img/><h4><a></a></h4><p></p><hr></div></div>' // marker template
+     * 'data-type'   => 'html'                  // 'html' or 'json'
+     * 'url'         =>
      */
-    $options = wp_parse_args( $options, array(
-      'width'        => '100%',                 // width of the map canvas ( include the units )
-      'height'       => '400px',                // height of the map canvas ( include the units )
-#      'marker'      => '#main .post',          // css selector of markers
-#      'name'        => '.entry-title',         // css selector of the title to show in the info window
-#      'link'        => '.entry-title a',       // css selector of the link to be used in the info window
-#      'description' => '.entry-content p',     // css selector of the description to show in the info window
-#      'image'       => '.entry-header img',    // css selector of the image to show in info window
-#      'latitude'    => '[itemprop=latitude]',  // css selector of the latitude to be used for placing the marker
-#      'longitude'   => '[itemprop=longitude]', // css selector of the longitude to be used for placing the marker
-      'center'       => array( -33.87308, 151.207001 ),  // initial center point for the map
-      'position'     => null,                   // set to 'autodetect' to have the position detected with geolocation
-      'canvas'       => '.canvas',              // css selector of the map canvas
-      'source'       => 'markup',               // 'markup' or 'ajax'
-    ));
+
+    /**
+     * Set default values if AJAX is being used
+     */
+    if ( isset( $attributes[ 'ajax' ] ) && true === $attributes[ 'ajax' ] && !isset( $attributes[ 'url' ] ) ) {
+      $attributes[ 'url' ]        = esc_url( admin_url( 'admin-ajax.php' ) );
+      $attributes[ 'data-type' ]  = 'json';
+    }
+
+    $attributes  = apply_filters_ref_array( 'the_map_attributes', array( $attributes, false ) );
 
     $args = wp_parse_args( $args, array(
       'echo'      => true,            // echo the output
       'enqueue'   => true,            // enqueue scripts and styles
-      'marker_template' => '',        // Mustache template to be used for
     ));
 
-    $options  = apply_filters( 'the_map_options', $options );
-    $template = apply_filters( 'the_map_marker_template', $args[ 'marker_template' ] );
+    $attr = Hardcore_Map::get_html_attributes( $attributes );
 
-    $json = json_encode( $options );
-
-    $html = <<<HTML
-  <div class="hardcore map" data-options='{$json}'>
-      <div class="canvas"></div>
-      <script type="text/html">
-      {$template}
-      </script>
-  </div>
-HTML;
+    $html = "<div class='hardcore map' {$attr}></div>";
 
     if ( $args[ 'enqueue' ] ) {
-      Hardcore_Maps_Plugin::enqueue_scripts();
+      Hardcore_Map_Plugin::enqueue_scripts();
     }
 
     if ( $args[ 'echo' ] ) {
@@ -69,18 +57,18 @@ HTML;
   }
 }
 
-if ( !function_exists( 'the_map_options' ) ) {
+if ( !function_exists( 'the_map_attributes' ) ) {
   /**
    * Return array of configuration options that are passed to the javascript to configure the jQuery Hardcore Map plugin.
    *
    * This configuration tells the javascript plugin what selectors to use when looking for information to build the map.
    * You can overload this function in the child or the parent theme to provide theme specific selectors.
    *
-   * @param array $options
+   * @param array $attributes
    * @param bool $echo
    * @return array
    */
-  function the_map_options( $options = array(), $echo = false ) {
+  function the_map_attributes( $attributes = array(), $echo = true ) {
 
     switch ( get_template() ) :
       case 'twentytwelve':
@@ -110,7 +98,12 @@ if ( !function_exists( 'the_map_options' ) ) {
         );
         break;
       default:
-        $theme = array(
+        /**
+         * To integrate this plugin with your commercial theme,
+         * hook to the_map_attributes_theme_defaults filter and specify
+         * your theme's default attributes
+         */
+        $theme = apply_filters( 'the_map_attributes_theme_defaults', array(
           'marker'       => '#content .hentry',
           'name'         => '.entry-title',
           'link'         => '.entry-title a',
@@ -118,49 +111,23 @@ if ( !function_exists( 'the_map_options' ) ) {
           'image'        => '.entry-header img',
           'latitude'     => '[itemprop=latitude]',
           'longitude'    => '[itemprop=longitude]',
-        );
+        ) );
     endswitch;
 
-    $options = wp_parse_args( $options, $theme );
+    $attributes = wp_parse_args( $attributes, $theme );
 
     if ( $echo ) {
-      echo json_encode( $options );
+      $attr = '';
+      foreach ( $attributes as $key => $value ) {
+        $attr .= " data-$key='$value'";
+      }
+      echo $attr;
     }
 
-    return $options;
+    return $attributes;
   }
 }
-add_filter( 'the_map_options', 'the_map_options' );
-
-if ( !function_exists( 'the_map_marker_template' ) ) {
-  /**
-   * Return default map marker mustache template
-   *
-   * @param string $template
-   * @param bool $echo
-   * @return string
-   */
-  function the_map_marker_template( $template = '', $echo = false ) {
-
-    if ( empty( $template ) ) {
-      $template = <<<TEMPLATE
-<div class="info-window">
-  <h4><a href="{{url}}">{{name}}</a></h4>
-  <img src="{{image}}" />
-  <p>{{description}}</p>
-  <hr>
-</div>
-TEMPLATE;
-    }
-
-    if ( $echo ) {
-      echo $template;
-    }
-
-    return $template;
-  }
-}
-add_filter( 'the_map_marker_template', 'the_map_marker_template' );
+add_filter( 'the_map_attributes', 'the_map_attributes', 10, 2 );
 
 if ( !function_exists( 'the_geo_coordinates_schema' ) ) {
   /**
@@ -184,7 +151,7 @@ if ( !function_exists( 'the_geo_coordinates_schema' ) ) {
 
     $args = wp_parse_args( $args, $default );
 
-    $plugin = Hardcore_Maps_Plugin::this();
+    $plugin = Hardcore_Map_Plugin::this();
 
     if ( !isset( $args[ 'latitude' ] ) ) {
       $args[ 'latitude' ] = get_post_meta( $post_ID, $plugin->latitude_meta_key, true );
@@ -199,7 +166,7 @@ if ( !function_exists( 'the_geo_coordinates_schema' ) ) {
       'post_ID' => $post_ID,
     )));
 
-    $icon_url = Hardcore_Maps_Plugin::locate_icon_url( $icon );
+    $icon_url = Hardcore_Map_Plugin::locate_icon_url( $icon );
 
     if ( $args[ 'latitude' ] && $args[ 'longitude' ] ) {
       $html = <<<HTML
@@ -243,7 +210,7 @@ if ( !function_exists( 'the_map_marker_icon' ) ) {
 
     $args = wp_parse_args( $args, $default );
 
-    $icon = Hardcore_Maps::get_map_marker_icon( $args );
+    $icon = Hardcore_Map::get_map_marker_icon( $args );
 
     if ( $args[ 'echo' ] ) {
       echo $icon;
@@ -253,4 +220,4 @@ if ( !function_exists( 'the_map_marker_icon' ) ) {
   }
 
 }
-add_filter( 'the_map_marker_icon', 'the_map_marker_icon' );
+add_filter( 'the_map_marker_icon', 'the_map_marker_icon', 10, 2 );
