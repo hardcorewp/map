@@ -36,6 +36,20 @@ if ( !class_exists( 'Hardcore_Map' ) ) {
       if ( isset( $attributes[ 'ajax' ] ) && true === $attributes[ 'ajax' ] && !isset( $attributes[ 'url' ] ) ) {
         $attributes[ 'url' ]        = esc_url( admin_url( 'admin-ajax.php' ) );
         $attributes[ 'data-type' ]  = 'json';
+        $attributes[ 'name' ]       = 'post_title';
+        $attributes[ 'description' ]= 'post_content';
+        $attributes[ 'image' ]      = 'post_thumbnail';
+        $attributes[ 'link' ]       = 'post_permalink';
+
+        $nonce = wp_create_nonce( Hardcore_Map_Plugin::$action );
+        if ( isset( $attributes[ 'data' ] ) ) {
+          $attributes[ 'data' ][ 'nonce' ] = $nonce;
+        } else {
+          $attributes[ 'data' ] = array(
+            'action'  => Hardcore_Map_Plugin::$action,
+            'nonce'   => $nonce
+          );
+        }
       }
 
       $id = '';
@@ -58,6 +72,16 @@ if ( !class_exists( 'Hardcore_Map' ) ) {
       }
       if ( $id ) {
         $id = "id='{$id}'";
+      }
+
+      if ( isset( $attributes[ 'query_vars' ] ) ) {
+        if ( isset( $attributes[ 'data' ] ) ) {
+          $data = wp_parse_args( $attributes[ 'data' ], $attributes[ 'query_vars' ] );
+        } else {
+          $data = $attributes[ 'query_vars' ];
+        }
+        unset( $attributes[ 'query_vars' ] );
+        $attributes[ 'data' ] = json_encode( $data );
       }
 
       $attributes  = apply_filters_ref_array( 'the_map_attributes', array( $attributes, false ) );

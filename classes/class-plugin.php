@@ -30,6 +30,13 @@ if ( !class_exists( 'Hardcore_Map_Plugin' ) ) {
      */
     var $marker_icon_meta_key = 'marker_icon';
 
+    /**
+     * Nonce value used by this plugin
+     *
+     * @var null
+     */
+    static $action = 'hardcore_map';
+
     function __construct( $args = array() ) {
 
       if ( isset( self::$_this ) ) {
@@ -132,9 +139,9 @@ if ( !class_exists( 'Hardcore_Map_Plugin' ) ) {
 
       // Pass a collection of variables to our JavaScript
       wp_localize_script( 'hardcore-map', 'Hardcore_Map', array(
-        'ajax_url' => admin_url('admin-ajax.php'),
-        'action' => 'hardcore-map',
-        'nonce' => wp_create_nonce( 'hardcore-map' ),
+        'ajax_url'  => admin_url('admin-ajax.php'),
+        'action'    => self::$action,
+        'nonce'     => wp_create_nonce( self::$action ),
       ) );
     }
 
@@ -215,19 +222,28 @@ if ( !class_exists( 'Hardcore_Map_Plugin' ) ) {
 
       // By default, let's start with an error message
       $response = array(
-        'status' => 'error',
+        'success' => false,
+        'data'    => array(),
         'message' => 'Invalid nonce',
       );
 
       // Next, check to see if the nonce is valid
-      if( isset( $_GET['nonce'] ) && wp_verify_nonce( $_GET['nonce'], 'hardcore-map' ) ){
+      if( isset( $_REQUEST['nonce'] ) && wp_verify_nonce( $_REQUEST['nonce'], self::$action ) ){
 
         // Update our message / status since our request was successfully processed
-        $response['status'] = 'success';
+        $response['success'] = true;
         $response['message'] = "Request processed successfully";
 
       }
 
+      if ( $response['success'] ) {
+        status_header( 200 );
+      } else {
+        status_header( 403 );
+      }
+
+      header('Content-Type: application/json');
+      echo json_encode( $response );
       die;
 
     }

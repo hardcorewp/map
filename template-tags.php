@@ -24,6 +24,7 @@ if ( !function_exists( 'the_map' ) ) {
      * 'template'    => '<div><div class="info-window"><img/><h4><a></a></h4><p></p><hr></div></div>' // marker template
      * 'data-type'   => 'html'                  // 'html' or 'json'
      * 'url'         =>
+     * 'query_vars'  => array()
      */
 
     $args = wp_parse_args( $args, array(
