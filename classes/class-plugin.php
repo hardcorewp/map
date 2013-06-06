@@ -112,7 +112,7 @@ if ( !class_exists( 'Hardcore_Map_Plugin' ) ) {
         $min = '';
       }
 
-      wp_register_script( 'google-maps', 'http://maps.google.com/maps/api/js?sensor=true', array(), '3.0', true );
+      wp_register_script( 'google-maps', 'http://maps.google.com/maps/api/js?sensor=true&libraries=geometry', array(), '3.0', true );
       wp_register_script( 'jquery-ui-map', plugin_dir_url( dirname( __FILE__ ) ) . "assets/jquery.ui.map{$min}.js", array( 'jquery', 'google-maps' ), '3.0-rc', true );
       wp_register_script( 'hardcore-map', plugin_dir_url( dirname( __FILE__ ) ) . "assets/hardcore.map.js", array( 'jquery-ui-map' ), HARDCORE_MAP_VERSION, true );
 

@@ -28,5 +28,54 @@ if ( !class_exists( 'Hardcore_Map' ) ) {
       }
       return $attr;
     }
+
+    static function get_map_html( $attributes, $args ) {
+      /**
+       * Set default values if AJAX is being used
+       */
+      if ( isset( $attributes[ 'ajax' ] ) && true === $attributes[ 'ajax' ] && !isset( $attributes[ 'url' ] ) ) {
+        $attributes[ 'url' ]        = esc_url( admin_url( 'admin-ajax.php' ) );
+        $attributes[ 'data-type' ]  = 'json';
+      }
+
+      $id = '';
+      if ( array_key_exists( 'id', $attributes ) ) {
+        $id = $attributes[ 'id' ];
+        unset( $attributes[ 'id' ] );
+      } else {
+        if ( is_single() ) {
+          global $post;
+          $id = $post->post_name;
+        }
+        if ( is_archive() ) {
+          global $wp_query;
+          $wp_query->get_queried_object();
+          $id = $wp_query->slug;
+        }
+        if ( is_search() ) {
+          $id = 'search';
+        }
+      }
+      if ( $id ) {
+        $id = "id='{$id}'";
+      }
+
+      $attributes  = apply_filters_ref_array( 'the_map_attributes', array( $attributes, false ) );
+
+      $args = wp_parse_args( $args, array(
+        'echo'      => true,            // echo the output
+        'enqueue'   => true,            // enqueue scripts and styles
+      ));
+
+      $attr = Hardcore_Map::get_html_attributes( $attributes );
+
+      $html = "<div {$id} class='hardcore map' {$attr}></div>";
+
+      if ( $args[ 'enqueue' ] ) {
+        Hardcore_Map_Plugin::enqueue_scripts();
+      }
+
+      return $html;
+    }
   }
 }

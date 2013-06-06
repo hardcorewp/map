@@ -11,7 +11,7 @@ if ( !function_exists( 'the_map' ) ) {
   function the_map( $attributes = array(), $args = array() ) {
 
     /**
-     * Attribute options that are used to configure the Bootstrap Map plugin
+     * Attribute options that are used to configure the Map plugin
      *
      * 'marker'      => '#main .post',          // css selector of markers
      * 'latitude'    => '[itemprop=latitude]',  // css selector of the latitude to be used for placing the marker
@@ -26,28 +26,12 @@ if ( !function_exists( 'the_map' ) ) {
      * 'url'         =>
      */
 
-    /**
-     * Set default values if AJAX is being used
-     */
-    if ( isset( $attributes[ 'ajax' ] ) && true === $attributes[ 'ajax' ] && !isset( $attributes[ 'url' ] ) ) {
-      $attributes[ 'url' ]        = esc_url( admin_url( 'admin-ajax.php' ) );
-      $attributes[ 'data-type' ]  = 'json';
-    }
-
-    $attributes  = apply_filters_ref_array( 'the_map_attributes', array( $attributes, false ) );
-
     $args = wp_parse_args( $args, array(
       'echo'      => true,            // echo the output
       'enqueue'   => true,            // enqueue scripts and styles
     ));
 
-    $attr = Hardcore_Map::get_html_attributes( $attributes );
-
-    $html = "<div class='hardcore map' {$attr}></div>";
-
-    if ( $args[ 'enqueue' ] ) {
-      Hardcore_Map_Plugin::enqueue_scripts();
-    }
+    $html = Hardcore_Map::get_map_html( $attributes, $args );
 
     if ( $args[ 'echo' ] ) {
       echo $html;
