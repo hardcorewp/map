@@ -72,6 +72,13 @@ if ( !class_exists( 'Hardcore_Map_Plugin' ) ) {
     }
 
     /**
+     * Callback for WordPress' init function
+     */
+    static function init() {
+      self::add_query_vars();
+    }
+
+    /**
      * Return existing instance of this plugin
      *
      * @return Hardcore_Map_Plugin|null
@@ -220,6 +227,8 @@ if ( !class_exists( 'Hardcore_Map_Plugin' ) ) {
 
     function wp_ajax_hardcore_map() {
 
+      $request = $_REQUEST;
+
       // By default, let's start with an error message
       $response = array(
         'success' => false,
@@ -229,11 +238,56 @@ if ( !class_exists( 'Hardcore_Map_Plugin' ) ) {
 
       // Next, check to see if the nonce is valid
       if( isset( $_REQUEST['nonce'] ) && wp_verify_nonce( $_REQUEST['nonce'], self::$action ) ){
-
         // Update our message / status since our request was successfully processed
         $response['success'] = true;
         $response['message'] = "Request processed successfully";
 
+        unset( $request[ 'nonce' ] );
+        unset( $request[ 'action' ] );
+
+        if ( isset( $request[ 'exclude' ] ) ) {
+          $request[ 'post__not_in' ] = $request[ 'exclude' ];
+          unset( $request[ 'exclude' ] );
+        }
+
+        $geo_query = array_intersect_key( $request, array(
+          'unit' => 'm',
+          'latitude' => 0,
+          'longitude' => 0,
+          'beyond'    => null,
+          'range'     => 3000,
+        ));
+
+        $query_vars = array_diff_assoc( $request, $geo_query );
+        $query_vars[ 'geo_query' ] = $geo_query;
+
+        if ( !isset( $query_vars[ 'orderby' ] ) ) {
+          $query_vars[ 'orderby' ] = 'distance';
+        }
+
+        if ( !isset( $query_vars[ 'order' ] ) ) {
+          $query_vars[ 'order' ] = 'ASC';
+        }
+
+        $query = new WP_Query( $query_vars );
+        $posts = $query->get_posts();
+        foreach ( $posts as $post ) {
+          $marker = new stdClass();
+          $marker->id           = $post->ID;
+          $marker->name         = $post->post_title;
+          $marker->description  = $post->post_excerpt;
+          $marker->link         = get_permalink( $post->ID );
+          $marker->latitude     = $post->latitude;
+          $marker->longitude    = $post->longitude;
+          $marker->distance     = $post->distance;
+          $marker->unit         = $post->distance_unit;
+          if ( has_post_thumbnail( $post->ID ) ) {
+            $marker->image = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), 'thumbnail' );
+          } else {
+            $marker->image = null;
+          }
+          $response[ 'data' ][] = $marker;
+        }
       }
 
       if ( $response['success'] ) {
@@ -243,13 +297,21 @@ if ( !class_exists( 'Hardcore_Map_Plugin' ) ) {
       }
 
       header('Content-Type: application/json');
-      echo json_encode( $response );
+      echo json_encode( $response[ 'data' ] );
       die;
-
     }
 
     function wp_ajax_nopriv_hardcore_map() {
       $this->wp_ajax_hardcore_map();
+    }
+
+    /**
+     * Register custom request query vars
+     */
+    static function add_query_vars() {
+      /** @var wp $wp */
+      $wp = $GLOBALS[ 'wp' ];
+      $wp->add_query_var( 'exclude' );
     }
 
   }

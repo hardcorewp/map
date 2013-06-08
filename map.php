@@ -21,6 +21,8 @@ add_action( 'plugins_loaded',     array( 'Hardcore_Map_Plugin', 'plugins_loaded'
 // include Template Tags API after parent and child themes were loaded
 add_action( 'after_setup_theme',  array( 'Hardcore_Map_Plugin', 'after_setup_theme' ) );
 
+add_action( 'init', array( 'Hardcore_Map_Plugin', 'init' ) );
+
 // Callbacks that add GeoCoordinates schema markup to the end of the content
 add_filter( 'the_content', array( 'Hardcore_Map_Plugin', 'the_content' ) );
 add_filter( 'the_excerpt', array( 'Hardcore_Map_Plugin', 'the_excerpt' ) );
