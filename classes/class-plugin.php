@@ -76,6 +76,8 @@ if ( !class_exists( 'Hardcore_Map_Plugin' ) ) {
      */
     static function init() {
       self::add_query_vars();
+      Hardcore_Geo_Query::add_query_vars();
+      Hardcore_Geo_Query::add_filters();
     }
 
     /**
@@ -105,6 +107,15 @@ if ( !class_exists( 'Hardcore_Map_Plugin' ) ) {
      * Callback to after_setup_theme action
      */
     static function after_setup_theme() {
+
+      if ( !defined( 'HARDCORE_GEO_QUERY_LATITUDE_META_KEY' ) ) {
+        define( 'HARDCORE_GEO_QUERY_LATITUDE_META_KEY', 'latitude' );
+      }
+
+      if ( !defined( 'HARDCORE_GEO_QUERY_LONGITUDE_META_KEY' ) ) {
+        define( 'HARDCORE_GEO_QUERY_LONGITUDE_META_KEY', 'longitude' );
+      }
+
       include HARDCORE_MAP_DIR . '/template-tags.php';
     }
 

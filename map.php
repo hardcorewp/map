@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Maps
+ * Plugin Name: Hardcore Map
  */
 
 define( 'HARDCORE_MAP_PATH', __FILE__ );
@@ -8,6 +8,7 @@ define( 'HARDCORE_MAP_DIR', dirname( __FILE__ ) );
 define( 'HARDCORE_MAP_VERSION', '1.0' );
 
 include( HARDCORE_MAP_DIR . '/classes/class-map.php' );
+include( HARDCORE_MAP_DIR . '/classes/class-query.php' );
 include( HARDCORE_MAP_DIR . '/classes/class-plugin.php' );
 
 /**
@@ -21,11 +22,14 @@ add_action( 'plugins_loaded',     array( 'Hardcore_Map_Plugin', 'plugins_loaded'
 // include Template Tags API after parent and child themes were loaded
 add_action( 'after_setup_theme',  array( 'Hardcore_Map_Plugin', 'after_setup_theme' ) );
 
-add_action( 'init', array( 'Hardcore_Map_Plugin', 'init' ) );
+add_action( 'init',               array( 'Hardcore_Map_Plugin', 'init' ) );
+
+// add Geo Query parsing to parse_query ( unhook this if you want to disable this functionality )
+add_action( 'parse_query',        array( 'Hardcore_Geo_Query', 'parse_query' ) );
 
 // Callbacks that add GeoCoordinates schema markup to the end of the content
-add_filter( 'the_content', array( 'Hardcore_Map_Plugin', 'the_content' ) );
-add_filter( 'the_excerpt', array( 'Hardcore_Map_Plugin', 'the_excerpt' ) );
+add_filter( 'the_content',        array( 'Hardcore_Map_Plugin', 'the_content' ) );
+add_filter( 'the_excerpt',        array( 'Hardcore_Map_Plugin', 'the_excerpt' ) );
 
 /**
  * All functions in functions.php and template-tags.php are intended for the use by site builders, themers and plugin

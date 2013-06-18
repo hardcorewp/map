@@ -206,3 +206,70 @@ if ( !function_exists( 'the_map_marker_icon' ) ) {
 
 }
 add_filter( 'the_map_marker_icon', 'the_map_marker_icon', 10, 2 );
+
+if ( !function_exists( 'the_nearby' ) ) {
+  /**
+   * Output a list of nearby posts
+   *
+   * @param int   $post_ID
+   * @param array $args
+   * @param array $query_vars
+   * @return string
+   */
+  function the_nearby( $post_ID = null, $args = array(), $query_vars = array() ) {
+
+    if ( is_null( $post_ID ) ) {
+      $post_ID = get_the_ID();
+    }
+
+    $default = array(
+      'title_format'          => '<h3>%s</h3>',
+      'before_list'           => '<ul class="nearby">',
+      'after_list'            => '</ul>',
+      'before_item'           => '<li>',
+      'after_item'            => '</li>',
+      'before_title'          => '<h4>',
+      'after_title'           => '</h4>',
+      'distance_format'       => __( '<span class="distance">%s away</span>', 'geo_query' ),
+      'post_thumbnail_show'   => false,
+      'post_thumbnail_size'   => 'thumbnail',
+      'post_thumbnail_attr'   => array(),
+      'echo'                  => true,
+    );
+
+    $args = wp_parse_args( $args , $default );
+
+    $posts = get_nearby( $post_ID, $query_vars );
+
+    if ( $posts ) {
+      $html = array();
+      if ( $args[ 'title_format' ] ) {
+        $html[] = sprintf( $args[ 'title_format' ], __( 'Nearby', 'geo_query' ) );
+      }
+      $html[] = $args[ 'before_list' ];
+      foreach ( $posts as $post ) {
+        setup_postdata( $post );
+        $url    = get_permalink( $post->ID );
+        $title  = apply_filters( 'the_title', $post->post_title, $post->ID );
+        $html[] = $args[ 'before_item' ];
+        if ( $args[ 'post_thumbnail_show' ] && has_post_thumbnail() ) {
+          $html[] = "<a href='{$url}'>";
+          $html[] = get_the_post_thumbnail( get_the_ID(), $args[ 'post_thumbnail_size' ], $args[ 'post_thumbnail_attr' ] );
+          $html[] = "</a>";
+        }
+        $html[] = "{$args[ 'before_title' ]}<a href='{$url}'>{$title}</a>{$args[ 'after_title' ]}";
+        $html[] = sprintf( $args[ 'distance_format' ], apply_filters( 'the_nearby_prettify_distance', $post->distance, $post->distance_unit ) );
+        $html[] = $args[ 'after_item' ];
+      }
+      $html[] = $args[ 'after_list' ];
+      wp_reset_postdata();
+
+      if ( $args[ 'echo' ] ) {
+        echo implode( "\n", $html );
+      } else {
+        return implode( "\n", $html );
+      }
+    }
+
+  }
+}
